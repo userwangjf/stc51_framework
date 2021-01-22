@@ -1,0 +1,17 @@
+# Windows:
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+#keil c51
+*.hex
+*.lst
+*.obj
+*.map
+*.sbr
+*.lnp
+*.bak
+*.o
+*.exe
+
+output/
