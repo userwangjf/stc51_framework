@@ -1,0 +1,10 @@
+
+
+
+void romfs_init()
+{
+
+
+}
+
+

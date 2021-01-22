@@ -1,0 +1,196 @@
+
+#include "bsp/config.h"
+
+//定义使用的按键
+#define JK_PAUSE	KEY_START
+#define JK_ROTATE	KEY_A
+#define JK_DOWN		KEY_DOWN
+#define JK_LEFT		KEY_LEFT
+#define JK_RIGHT	KEY_RIGHT
+
+
+static u8   pause = 0;  		// 游戏暂停
+static u8   level = 1;          // 级别
+static u16  lines = 0;          // 消除的行数
+static u16  score = 0;          // 分数
+static u16  time_count = 0;
+
+
+void tetris_pause(void)
+{
+    pause = !pause;
+
+    if(pause)
+        ;//打印分数
+    else
+        tetris_sync_all();      // 因为打印暂停破坏了地图区显示
+                                // 所以退出时要刷新整个地图区
+    return;
+}
+
+//回调函数，计算分数
+void tetris_get_score(u8 line)
+{
+    lines += line;
+
+    switch (line)
+    {
+    case 1:
+        score += 10;
+        break;
+    case 2:
+        score += 25;
+        break;
+    case 3:
+        score += 45;
+        break;
+    case 4:
+        score += 80;
+        break;
+    default:
+        break;
+    }
+
+    // 每25行升一级
+    level = lines / 25 + 1;
+
+    return;
+}
+
+//回调函数，用于在屏幕上画出box
+//color为0时清除此坐标上的box
+void tetris_draw_box(u8 x, u8 y, u8 color)
+{
+    if (color == 0)
+        disp_off(x,y);
+    else
+        disp_on(x,y);
+
+    return;
+}
+
+//回调函数，用于生成随机数
+u8 tetris_random()
+{
+	return random();
+}
+
+//返回下一个方块，用于预览显示
+void tetris_preview_brick(const void *info)
+{
+
+    return;
+}
+
+//更新打印
+void game_info_update()
+{
+
+}
+
+
+//定时调用此函数
+void tetris_run(u8 key)
+{
+    static u8 refresh = 0;
+    u8 i;
+
+	brick_t brick;
+
+	if(time_count++ > 200)
+	{
+		time_count=0;
+		create_new_brick(&brick);
+		draw_brick(&brick);
+		for(i=0;i<20;i++)
+			map[i] = i;
+		for(i=0;i<20;i++)
+			disp_row(i,map[i]);
+		//tetris_sync_all();
+		//Uart1_Tx(hex2str(brick.brick));
+		//Uart1_Tx(",");
+	}
+
+	return;
+
+	//游戏结束
+	if(tetris_is_game_over())return;
+
+    if (!pause)
+        time_count++;
+
+    // 自由向下移动，级别越高速度越快
+    if (time_count >= (100 - level))
+    {
+        time_count = 0;
+
+        refresh = 1;
+        tetris_move(dire_down);
+    }
+
+	//有按键按下
+    if(KEY_VALID(key))
+    {
+        // 暂停时只响应回车键
+        if (pause && key != JK_PAUSE)
+            return;
+
+        switch(key)
+        {
+        case JK_ROTATE:
+            tetris_move(dire_rotate);
+            break;
+        case JK_DOWN:
+            tetris_move(dire_down);
+            break;
+        case JK_LEFT:
+            tetris_move(dire_left);
+            break;
+        case JK_RIGHT:
+            tetris_move(dire_right);
+            break;
+        case JK_PAUSE:
+            tetris_pause();
+            break;
+        default:
+            break;
+        }
+
+        refresh = 1;
+    }
+
+    if (refresh)
+    {
+        refresh = !refresh;
+        tetris_sync();
+        // 更新行数, 分数等信息
+        game_info_update();
+    }
+
+    return;
+}
+
+
+s8 tetris_init(void)
+{
+	// 初始化, 需要的回调函数说明:
+	// 在(x, y)画一个box, color为颜色, 注意0表示清除, 不表示任何颜色
+	// draw_box_to_map(uint8_t x, uint8_t y, uint8_t color)
+	
+	// 函数须返回一个随机数, 产生新方块使用
+	// get_random(void)
+	
+	// 当产生新方块后回调此函数, 参数为新方块的数据
+	// 当前版本 *info 为uint16_t型数据, 代表新方块的点阵数据
+	// next_brick_info(const void *info)
+	
+	// 当发生消行时回调此函数, 参数为消除的行数
+	// remove_line_num(uint8_t line)
+    tetris_start(tetris_draw_box, tetris_random, tetris_preview_brick, tetris_get_score);
+
+    //tetris_pause();
+
+	tetris_draw_box(5,5,1);
+
+    return 0;
+}

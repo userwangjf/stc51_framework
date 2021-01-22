@@ -1,0 +1,41 @@
+{
+    "configurations": [
+        {
+            "name": "keil",
+            "includePath": [
+                "w:\\SWork\\STC51\\stc51_framework",
+                "C:\\Keil\\C51\\INC",
+                "w:\\SWork\\STC51\\stc51_framework\\bsp",
+                "w:\\SWork\\STC51\\stc51_framework\\app",
+                "w:\\SWork\\STC51\\stc51_framework\\os",
+                "w:\\SWork\\STC51\\stc51_framework\\module"
+            ],
+            "defines": [
+                "__C51__",
+                "__VSCODE_C51__",
+                "reentrant=",
+                "compact=",
+                "small=",
+                "large=",
+                "data=",
+                "idata=",
+                "pdata=",
+                "bdata=",
+                "xdata=",
+                "code=",
+                "bit=char",
+                "sbit=char",
+                "sfr=char",
+                "sfr16=int",
+                "sfr32=int",
+                "interrupt=",
+                "using=",
+                "_at_=",
+                "_priority_=",
+                "_task_="
+            ],
+            "intelliSenseMode": "${default}"
+        }
+    ],
+    "version": 4
+}
